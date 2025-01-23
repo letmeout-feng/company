@@ -1,0 +1,298 @@
+<template>
+  <div>
+    <a-card title="待确认丢单" :headStyle="{ 'height': '66px' }">
+      <template #extra>
+        <div style="display: flex; justify-content: flex-start; align-items: center; text-align: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <a-input allowClear v-model:value="query" placeholder="请输入搜索内容" size="middle"
+              @pressEnter="handleSearch"></a-input>
+            <a-button @click="handleSearch" type="primary" size="middle">搜索</a-button>
+            <a-button type="primary" size="middle" :disabled="pagination.total < 1" @click="exportData">导出</a-button>
+          </div>
+        </div>
+      </template>
+      <a-table :columns="visibleColumns" :data-source="data" :pagination="pagination" :loading="loading"
+        :rowKey="record => record.id" :row-selection="rowSelection" @change="handleTableChange">
+        <template #bodyCell="{ column, record, index }">
+          <template v-if="column.dataIndex === 'index'">
+            <span>{{ (pagination.current - 1) * pagination.pageSize + index + 1 }}</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'amount'">
+            <span>{{ record.amount !== null && record.amount !== undefined ? formatNumber(record.amount.toFixed(2)) : '-'
+            }}</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'projExtQuoteTotal'">
+            <span>{{ record.projExtQuoteTotal !== null && record.projExtQuoteTotal !== undefined ?
+              formatNumber(record.projExtQuoteTotal.toFixed(2)) : '-' }}</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'signQuoteTotal'">
+            <span>{{ record.signQuoteTotal !== null && record.signQuoteTotal !== undefined ?
+              formatNumber(record.signQuoteTotal.toFixed(2)) : '-' }}</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'signProjProfitRateExcl'">
+            <span>{{ record.signProjProfitRateExcl !== null && record.signProjProfitRateExcl !== undefined ?
+              (parseFloat(record.signProjProfitRateExcl) * 100).toFixed(2) + '%' : '-' }}</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'contractType'">
+            <span v-if="record.contractType === '1'">欣象代理</span>
+            <span v-else-if="record.contractType === '2'">北光直签</span>
+            <span v-else>-</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'updateTime'">
+            <span>{{ record.updateTime ? new Date(record.updateTime).toLocaleString() : '-' }}</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'statusBeforeLose'">
+            <span>{{ getStatusText(record.statusBeforeLose) }}</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'reasonDesc'">
+            <div class="ellipsis-text">
+              <a-tooltip placement="bottom">
+                <template #title>
+                  {{ record.reasonDesc ? record.reasonDesc : '-' }}
+                </template>
+                {{ record.reasonDesc ? record.reasonDesc : '-' }}
+              </a-tooltip>
+            </div>
+          </template>
+          <span v-else-if="column.dataIndex === 'actions'" style="text-align: left;">
+            <a-button v-hasPermi="['quote:wait:lose:details']" type="link" @click="handleDetail(record)" class="nomp">详情</a-button>
+            <a-button v-hasPermi="['quote:lose:approval']" type="link" @click="handleApproveLoss(record)"
+              class="nomp">丢单审批</a-button>
+          </span>
+        </template>
+      </a-table>
+    </a-card>
+
+    <ApproveDetail :open="isModalVisible" :record="selectedRecord" @close="handleClose" @ok="handleOk"
+      :isModalVisible="isModalVisible" :isWaitingSign="isWaitingSign" :isSignApprovalStatus="isSignApprovalStatus"
+      :isLoss="isLoss">
+    </ApproveDetail>
+    <LossOrder :open="isLossOrder" :opportunity="selectedRecord" :isLossOrder="isLossOrder" @close="closeLossOrder">
+    </LossOrder>
+    <OrderLoss :open="isOrderLoss" :opportunity="selectedRecord" :isOrderLoss="isOrderLoss" @close="closeOrderLoss">
+    </OrderLoss>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, computed } from 'vue';
+import { fetchLoseInfo } from '@/api/lose'
+import ApproveDetail from '../../sales/CompanyApproval/components/ApproveDetail.vue';
+import LossOrder from './components/LossOrderApproval.vue'
+import OrderLoss from './components/OrderLossApproval.vue'
+import { formatNumber } from '@/utils/format'
+import { statusMap } from '@/enums/LoseType'
+import { exportToExcel } from '@/utils/common'
+
+const columns = ref([
+  { title: '序号', dataIndex: 'index', key: 'index', render: (_, __, index) => index + 1, width: '6%' },
+  { title: 'id', dataIndex: 'id', visible: false },
+  { title: '商机名称', dataIndex: 'name', width: '13%', sorter: (a, b) => a.name.localeCompare(b.name) },
+  // { title: '客户名称', dataIndex: 'customersName', sorter: (a, b) => a.customersName.localeCompare(b.customersName) },
+  { title: '所属销售id', dataIndex: 'saleId', visible: false },
+  { title: '所属销售', dataIndex: 'saleName', sorter: (a, b) => a.saleName.localeCompare(b.saleName) },
+  // { title: '产品类别', dataIndex: 'category', key: 'category', sorter: (a, b) => a.category.localeCompare(b.category) },
+  // { title: '所属售前', dataIndex: 'preSaleId', visible: false },
+  // { title: '所属售前', dataIndex: 'preSaleName', sorter: (a, b) => a.preSaleName.localeCompare(b.preSaleName) },
+  { title: '成本报价', dataIndex: 'amount', key: 'amount', sorter: (a, b) => parseFloat(a.amount) - parseFloat(b.amount) },
+  { title: '销售对外报价', dataIndex: 'projExtQuoteTotal', key: 'projExtQuoteTotal', sorter: (a, b) => parseFloat(a.projExtQuoteTotal) - parseFloat(b.projExtQuoteTotal) },
+  // { title: '合同报价', dataIndex: 'signQuoteTotal', key: 'signQuoteTotal', sorter: (a, b) => parseFloat(a.signQuoteTotal) - parseFloat(b.signQuoteTotal) },
+  { title: '整体利润率', dataIndex: 'signProjProfitRateExcl', key: 'signProjProfitRateExcl', },
+  // { title: '合同类型', dataIndex: 'contractType', key: 'contractType', sorter: (a, b) => parseFloat(a.contractType) - parseFloat(b.contractType) },
+  { title: '申请丢单前状态', dataIndex: 'statusBeforeLose', key: 'statusBeforeLose'},
+  { title: '丢单理由', dataIndex: 'reasonDesc', key: 'reasonDesc', width: '13%' },
+  { title: '申请丢单时间', dataIndex: 'loseTime', key: 'loseTime', width: '11%', sorter: (a, b) => new Date(a.updateTime) - new Date(b.updateTime) },
+  { title: '操作', dataIndex: 'actions', key: 'actions', width: '8%' },
+]);
+const visibleColumns = computed(() => {
+  return columns.value.filter(column => column.visible !== false);
+});
+const selectedRowKeys = ref([]);
+const selectedRowRecords = ref([]);
+const rowSelection = computed(() => ({
+  selectedRowKeys: selectedRowKeys.value,
+  onChange: (selectedKeys) => {
+    selectedRowKeys.value = selectedKeys;
+    selectedRowRecords.value = data.value.filter(record => selectedKeys.includes(record.id));
+  }
+}));
+const data = ref([]);
+const loading = ref(true);
+const selectedRecord = ref(null)
+const isWaitingSign = ref(false) //是否显示签约申请标识
+const isModalVisible = ref(false) //报价详情
+const isSignApprovalStatus = ref(false)
+const query = ref('');
+const isLoss = ref(false)
+
+const isLossOrder = ref(false)//待销售报价---其他
+const isOrderLoss = ref(false) //待销售报价---未报价
+
+const pagination = ref({
+  current: 1,
+  pageSize: 10,
+  total: 1,
+});
+// 数据加载  
+const loadOpportunities = async () => {
+  loading.value = true;
+  const filters = {
+    id: '',
+    name: '',
+    category: '',
+    statusList: ['14'],
+    parentStatusList: ["00001301"],
+    query: query.value.trim(),
+  };
+  const params = {
+    current: pagination.value.current,
+    model: filters,
+    order: 'descending',
+    size: pagination.value.pageSize,
+    sort: 'id',
+  }
+  try {
+    const response = await fetchLoseInfo('pageWaitLose', params);
+    data.value = response.rows || []; // 确保响应结构正确 
+    // 手动默认按升序排序, 避免高亮 
+    data.value = [...data.value].sort(
+      (a, b) => new Date(a.updateTime) - new Date(b.updateTime)
+    );
+    pagination.value.total = response.total;
+  } catch (error) {
+    console.error('Error loading opportunities:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+const handleTableChange = (paginationProps) => {
+  if (paginationProps.current) {
+    pagination.value.current = paginationProps.current;
+    loadOpportunities();
+  }
+}
+
+const handleSearch = () => {
+  loadOpportunities(); // 重新加载数据并应用搜索
+};
+onMounted(loadOpportunities);
+// 根据状态数字返回对应的中文描述
+const getStatusText = (status) => {
+  return statusMap[status] || '未知状态'; // 如果状态未定义，返回'未知状态'
+};
+const handleDetail = (record) => {
+  isLoss.value = true
+  selectedRecord.value = record;
+  isWaitingSign.value = true
+  isSignApprovalStatus.value = true
+  isModalVisible.value = true;
+};
+const handleClose = () => {
+  isLoss.value = false
+  isModalVisible.value = false
+  isWaitingSign.value = false
+  isSignApprovalStatus.value = false
+}
+
+const handleApproveLoss = (record) => {
+  console.log('丢单申请', isLossOrder, isOrderLoss)
+  selectedRecord.value = record;
+  if (record.loseType === '1' || (['2', '3', '4'].includes(record.loseType) && record.type === 'INCAPABLE')) {
+    isOrderLoss.value = true
+  } else {
+    isLossOrder.value = true
+  }
+}
+const closeLossOrder = () => {
+  isLossOrder.value = false
+  loadOpportunities()
+}
+const closeOrderLoss = () => {
+  isOrderLoss.value = false
+  loadOpportunities()
+}
+const getContractTypeLabel = (contractType) => {
+  switch (contractType) {
+    case '1':
+      return '欣象代理'
+    case '2':
+      return '北光直签'
+    default:
+      return '-'
+  }
+}
+// 导出 Excel
+const exportData = async () => {
+  loading.value = true;
+  const filters = {
+    id: '',
+    name: '',
+    category: '',
+    statusList: ['14'],
+    parentStatusList: ["00001301"],
+    query: '',
+  };
+  const params = {
+    current: pagination.value.current,
+    model: filters,
+    order: 'descending',
+    size: 99999,
+    sort: 'id',
+  }
+  try {
+    const response = await fetchLoseInfo('pageWaitLose', params);
+    let data = selectedRowKeys.value.length > 0 ? selectedRowRecords.value : response.rows
+    data = data.sort(
+      (a, b) => new Date(a.updateTime) - new Date(b.updateTime)
+    );
+    const exportData = data.map((item) => ({
+      '商机名称': item.name,
+      '客户名称': item.customersName,
+      '所属销售': item.saleName,
+      '产品类别': item.category,
+      '所属售前': item.preSaleName,
+      '成本报价': item.amount,
+      '销售对外报价': item.projExtQuoteTotal,
+      '合同报价': item.signQuoteTotal,
+      '整体利润率(不含外采)': item.signProjProfitRateExcl !== null && item.signProjProfitRateExcl !== undefined ? (parseFloat(item.signProjProfitRateExcl) * 100).toFixed(2) + '%' : '-',
+      '合同类型': getContractTypeLabel(item.contractType),
+      '申请丢单前状态': getStatusText(item.statusBeforeLose),
+      '丢单理由': item.reasonDesc || '-',
+      '申请丢单时间': item.loseTime || '-'
+    }))
+    exportToExcel(exportData, '丢单汇总_待丢单确认')
+  } catch (error) {
+    console.error('Error loading opportunities:', error);
+  } finally {
+    loading.value = false;
+  }
+}
+</script>
+
+<style scoped>
+.table-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ant-table {
+  flex: 1;
+  background-color: #f0f5ff;
+  overflow: auto;
+}
+
+.ant-btn {
+  margin-right: 10px;
+  z-index: 999;
+}
+
+.ellipsis-text {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+</style>
