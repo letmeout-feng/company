@@ -157,7 +157,7 @@ public class QuotePresaleInfoController extends BaseController
      */
     @Operation(summary = "待销售报价-确认销售报价", description  = "待销售报价-确认销售报价")
     @Log(title = "待销售报价-确认销售报价", businessType = BusinessType.INSERT)
-    @PreAuthorize("@ss.hasPermi('quote:sale:create','quote:rejected:update','quote:order:update')")
+    @PreAuthorize("@ss.hasPermi('quote:sale:create','quote:rejected:update','quote:order:update','quote:lose:reject:update')")
     @PostMapping("/addSalesQuotesVersion")
     public R<Integer> addSalesQuotesVersion(@RequestBody QuotePresaleInfoSaveDTO saveDTO)
     {

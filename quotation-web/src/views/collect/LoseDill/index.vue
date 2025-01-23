@@ -35,7 +35,7 @@
                     <span v-if="record.contractType === '2'">北光直签</span>
                 </template>
                 <span v-else-if="column.dataIndex === 'actions'" style="text-align: left;">
-                    <a-button type="link" @click="handleDetail(record)" class="nomp">详情</a-button>
+                    <a-button v-hasPermi="['quote:summary:lose:details']" type="link" @click="handleDetail(record)" class="nomp">详情</a-button>
                 </span>
             </template>
         </a-table>

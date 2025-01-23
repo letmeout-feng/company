@@ -355,7 +355,7 @@ public class QuoteOpportunitiesController extends BaseController {
      */
     @Operation(summary = "重新申请报价", description  = "重新申请报价")
     @PreAuthorize("@ss.hasPermi('quote:sale:reapply','quote:rejected:reapply','quote:rejected:update'" +
-            ",'quote:order:reapply','quote:order:update','quote:contract:rejected:replay')")
+            ",'quote:order:reapply','quote:order:update','quote:contract:rejected:replay','quote:lose:reject:replay')")
     @Log(title = "重新申请报价", businessType = BusinessType.UPDATE)
     @PutMapping("/apply")
     public R<Boolean> quoteApply(@RequestBody ReQuoteDTO dto) {

@@ -45,14 +45,14 @@
             <span>{{ getStatusText(record.statusBeforeLose) }}</span>
           </template>
           <span v-else-if="column.dataIndex === 'actions'" style="text-align: left;">
-            <a-button type="link" @click="handleDetail(record)" class="nomp">详情</a-button>
-            <a-button v-hasPermi="['quote:order:reapply']" type="link" @click="handleUnqoute('discard', record)"
+            <a-button v-hasPermi="['quote:lose:reject:details']" type="link" @click="handleDetail(record)" class="nomp">详情</a-button>
+            <a-button v-hasPermi="['quote:lose:reject:handleLost']" type="link" @click="handleUnqoute('discard', record)"
               class="nomp">丢单处理</a-button>
-            <a-button v-hasPermi="['quote:order:handleLost']" type="link" @click="handleUnqoute('reapply', record)"
+            <a-button v-hasPermi="['quote:lose:reject:replay']" type="link" @click="handleUnqoute('reapply', record)"
               class="nomp">重新申请报价</a-button>
-            <a-button v-hasPermi="['quote:order:update']" type="link" @click="updateSalesOffer(record)" class="nomp"
+            <a-button v-hasPermi="['quote:lose:reject:update']" type="link" @click="updateSalesOffer(record)" class="nomp"
               v-if="['2', '3', '4', '5', '6'].includes(record.loseType)">更新销售报价</a-button>
-            <a-button v-hasPermi="['quote:order:contractRequest']" type="link" @click="handleUpdate(record)"
+            <a-button v-hasPermi="['quote:lose:reject:sign:update']" type="link" @click="handleUpdate(record)"
               class="nomp" v-if="['5', '6'].includes(record.loseType)">更新签约申请</a-button>
           </span>
         </template>

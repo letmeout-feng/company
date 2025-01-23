@@ -58,7 +58,7 @@
                         <span class="description" :class="{ 'expanded': isExpanded }">
                             {{ isExpanded ? (quoteDesc ? quoteDesc : '-') : truncatedDescription }}
                         </span>
-                        <span class="toggle-button" v-if="quoteDesc?.length > 80">{{ isExpanded ? '收起' : '展开' }}</span>
+                        <span class="toggle-button" v-if="quoteDesc?.length > 30">{{ isExpanded ? '收起' : '展开' }}</span>
                     </div>
                 </div>
                 <div v-if="opportunity.type === 'COST'" class="desc">
@@ -67,7 +67,7 @@
                         <span class="description" :class="{ 'expanded': isExpanded }">
                             {{ isExpanded ? (quoteDesc ? quoteDesc : '-') : truncatedDescription }}
                         </span>
-                        <span class="toggle-button" v-if="quoteDesc?.length > 80">{{ isExpanded ? '收起' : '展开' }}</span>
+                        <span class="toggle-button" v-if="quoteDesc?.length > 30">{{ isExpanded ? '收起' : '展开' }}</span>
                     </div>
                 </div>
             </div>
@@ -1457,8 +1457,9 @@ const getSalesInfoFunc = async (fetchFunc, boolean) => {
         const response = await fetchFunc({ opportunitiesId: props.opportunity.id, quoteType: quoteType });
         if (response && response.code === 200) {
             const data = response.data
-            if (data.quoteDesc) quoteDesc.value = data.quoteDesc
-            if (data.closeNote) closeNote.value = data.closeNote
+            quoteDesc.value = data.quoteDesc
+            console.log(data.quoteDesc,'data.quoteDescdata.quoteDescdata.quoteDesc',quoteDesc.value)
+            closeNote.value = data.closeNote
             quotesPresaleInfo.value.opportunitiesId = data.id
             quotesPresaleInfo.value.devPrice = data.quotesPresaleInfo.devPrice;
             quotesPresaleInfo.value.devTaxRate = Number(data.quotesPresaleInfo.devTaxRate);
@@ -1830,7 +1831,7 @@ const handleLose = () => {
 
 // 展开收起 
 const truncatedDescription = computed(() => {
-    const maxLength = 80;
+    const maxLength = 30;
     if (quoteDesc.value && quoteDesc.value.length > maxLength) {
         return quoteDesc.value.substring(0, maxLength) + '...';
     }

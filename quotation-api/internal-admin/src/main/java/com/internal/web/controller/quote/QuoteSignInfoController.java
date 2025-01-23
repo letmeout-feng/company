@@ -116,7 +116,7 @@ public class QuoteSignInfoController extends BaseController
      */
     @Operation(summary = "签约申请", description  = "签约申请")
     @Log(title = "签约申请", businessType = BusinessType.UPDATE)
-    @PreAuthorize("@ss.hasPermi('quote:order:contractRequest','quote:contract:approval:update','quote:contract:rejected:update')")
+    @PreAuthorize("@ss.hasPermi('quote:order:contractRequest','quote:contract:approval:update','quote:contract:rejected:update','quote:lose:reject:sign:update')")
     @PostMapping("/signApplication")
     public R<Boolean> signApplication(@RequestBody SignApplicationSaveDTO vo)
     {

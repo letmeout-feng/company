@@ -98,7 +98,8 @@ public class QuoteLoseController extends BaseController {
      */
     @Operation(summary = "丢单处理", description = "丢单处理")
     @PreAuthorize("@ss.hasPermi('quote:sale:handleLost','quote:rejected:handleLost','quote:rejected:update'" +
-            ",'quote:order:handleLost','quote:order:contractRequest','quote:order:update','quote:contract:approval:handleLost','quote:contract:rejected:handleLost')")
+            ",'quote:order:handleLost','quote:order:contractRequest','quote:order:update','quote:contract:approval:handleLost','quote:contract:rejected:handleLost'" +
+            ",'quote:lose:reject:handleLost')")
     @Log(title = "商机丢单处理", businessType = BusinessType.UPDATE)
     @PostMapping("/lose")
     public R<Boolean> lose(@RequestBody LoseDTO dto) {

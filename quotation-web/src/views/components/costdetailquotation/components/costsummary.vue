@@ -48,7 +48,7 @@
                                 <span class="description" :class="{ 'expanded': isExpanded }">
                                     {{ isExpanded ? (valuationDesc ? valuationDesc : '-') : truncatedDescription }}
                                 </span>
-                                <span class="toggle-button" v-if="valuationDesc?.length > 80">{{ isExpanded ? '收起' : '展开'
+                                <span class="toggle-button" v-if="valuationDesc?.length > 30">{{ isExpanded ? '收起' : '展开'
                                 }}</span>
                             </div>
                         </div>
@@ -111,7 +111,7 @@
                                 <span :class="{ 'expanded': isExpanded }">
                                     {{ isExpanded ? (valuationDesc ? valuationDesc : '-') : truncatedDescription }}
                                 </span>
-                                <span class="toggle-button" v-if="valuationDesc?.length > 60">{{ isExpanded ? '收起' : '展开'
+                                <span class="toggle-button" v-if="valuationDesc?.length > 30">{{ isExpanded ? '收起' : '展开'
                                 }}</span>
                             </div>
                         </div>
@@ -757,7 +757,7 @@ const resetAll = () => {
 
 // 展开收起 
 const truncatedDescription = computed(() => {
-    const maxLength = 60;
+    const maxLength = 30;
     if (valuationDesc.value && valuationDesc.value.length > maxLength) {
         return valuationDesc.value.substring(0, maxLength) + '...';
     }

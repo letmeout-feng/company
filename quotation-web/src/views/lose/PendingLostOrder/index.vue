@@ -45,7 +45,7 @@
             <span>{{ getStatusText(record.statusBeforeLose) }}</span>
           </template>
           <span v-else-if="column.dataIndex === 'actions'" style="text-align: left;">
-            <a-button type="link" @click="handleDetail(record)" class="nomp">详情</a-button>
+            <a-button v-hasPermi="['quote:wait:lose:details']" type="link" @click="handleDetail(record)" class="nomp">详情</a-button>
             <a-button v-hasPermi="['quote:lose:approval']" type="link" @click="handleApproveLoss(record)"
               class="nomp">丢单审批</a-button>
           </span>

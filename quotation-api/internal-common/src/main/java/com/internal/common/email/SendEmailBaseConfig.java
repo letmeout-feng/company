@@ -1,5 +1,6 @@
 package com.internal.common.email;
 
+import com.alibaba.fastjson2.JSON;
 import com.internal.common.core.domain.dto.EmailModelInfoConvertDTO;
 import com.internal.common.core.domain.dto.EmailSubjectInfoConvertDTO;
 import com.internal.common.core.domain.entity.SysUser;
@@ -77,7 +78,7 @@ public class SendEmailBaseConfig {
                 attempt++;
                 log.error("发送邮件时发生错误, 尝试次数: " + attempt, e);
                 if (attempt == MAX_RETRY_COUNT) {
-                    throw new RuntimeException("发送邮件失败，请稍后重试。"); // 达到最大重试次数，抛出异常
+                    log.error("发送邮件失败，请稍后重试。"); // 达到最大重试次数，抛出异常
                 }
             }
         }
@@ -105,7 +106,7 @@ public class SendEmailBaseConfig {
                 attempt++;
                 log.error("发送邮件时发生错误, 尝试次数: " + attempt, e);
                 if (attempt == MAX_RETRY_COUNT) {
-                    throw new RuntimeException("发送邮件失败，请稍后重试。"); // 达到最大重试次数，抛出异常
+                    log.error("发送邮件失败，请稍后重试。");
                 }
             }
         }
@@ -170,7 +171,7 @@ public class SendEmailBaseConfig {
                     } catch (UnsupportedEncodingException e) {
                         // 如果编码失败，使用原始文件名
                         attachmentPart.setFileName(entry.getKey());
-                        e.printStackTrace();
+                        log.error("编码文件名失败:{}，使用原始文件名。", JSON.toJSONString(e));
                     }
 
                     multipart.addBodyPart(attachmentPart);
@@ -198,7 +199,6 @@ public class SendEmailBaseConfig {
             transport.close();
         } catch (Exception e) {
             log.error("通过QQ邮箱发送邮件时发生错误", e);
-            throw new RuntimeException("发送邮件失败，请稍后重试。");
         }
     }
 
@@ -262,7 +262,7 @@ public class SendEmailBaseConfig {
                     } catch (UnsupportedEncodingException e) {
                         // 如果编码失败，使用原始文件名
                         attachmentPart.setFileName(entry.getKey());
-                        e.printStackTrace();
+                        log.error("编码文件名失败:{}，使用原始文件名。", JSON.toJSONString(e));
                     }
 
                     multipart.addBodyPart(attachmentPart);
@@ -278,7 +278,6 @@ public class SendEmailBaseConfig {
             transport.close();
         } catch (Exception e) {
             log.error("通过网易邮箱发送邮件时发生错误", e);
-            throw new RuntimeException("发送邮件失败，请稍后重试。");
         }
     }
 
@@ -336,7 +335,6 @@ public class SendEmailBaseConfig {
             }
         } catch (Exception e) {
             log.error("处理异常地址时发生错误", e);
-            throw new RuntimeException("发送邮件失败，请稍后重试。");
         }
     }
 
@@ -354,7 +352,6 @@ public class SendEmailBaseConfig {
             }
         } catch (Exception e) {
             log.error("发送异常邮件时发生错误", e);
-            throw new RuntimeException("发送邮件失败，请稍后重试。");
         }
     }
 
@@ -410,7 +407,7 @@ public class SendEmailBaseConfig {
                     } catch (UnsupportedEncodingException e) {
                         // 如果编码失败，使用原始文件名
                         attachmentPart.setFileName(entry.getKey());
-                        e.printStackTrace();
+                        log.error("编码文件名失败:{}，使用原始文件名。", JSON.toJSONString(e));
                     }
 
                     multipart.addBodyPart(attachmentPart);
@@ -437,7 +434,6 @@ public class SendEmailBaseConfig {
             transport.close();
         } catch (Exception e) {
             log.error("通过QQ邮箱发送异常邮件时发生错误", e);
-            throw new RuntimeException("发送邮件失败，请稍后重试。");
         }
     }
 
@@ -499,7 +495,7 @@ public class SendEmailBaseConfig {
                     } catch (UnsupportedEncodingException e) {
                         // 如果编码失败，使用原始文件名
                         attachmentPart.setFileName(entry.getKey());
-                        e.printStackTrace();
+                        log.error("编码文件名失败:{}，使用原始文件名。", JSON.toJSONString(e));
                     }
 
                     multipart.addBodyPart(attachmentPart);
@@ -512,7 +508,6 @@ public class SendEmailBaseConfig {
             Transport.send(message);
         } catch (Exception e) {
             log.error("通过网易邮箱发送异常邮件时发生错误", e);
-            throw new RuntimeException("发送邮件失败，请稍后重试。");
         }
     }
 
