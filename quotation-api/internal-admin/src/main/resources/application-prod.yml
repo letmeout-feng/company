@@ -1,0 +1,107 @@
+# 开发环境配置
+server:
+    # 服务器的HTTP端口，默认为8080
+    port: 7398
+# spring配置
+spring:
+    datasource:
+        dynamic:
+            primary: master # 设置默认数据源
+            druid:
+                # 初始连接数
+                initial-size: 5
+                # 最小连接池数量
+                min-idle: 5
+                # 最大连接池数量
+                maxActive: 20
+                # 配置获取连接等待超时的时间
+                maxWait: 60000
+                # 配置连接超时时间
+                connectTimeout: 30000
+                # 配置网络超时时间
+                socketTimeout: 60000
+                # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+                timeBetweenEvictionRunsMillis: 60000
+                # 配置一个连接在池中最小生存的时间，单位是毫秒
+                minEvictableIdleTimeMillis: 300000
+                # 配置一个连接在池中最大生存的时间，单位是毫秒
+                maxEvictableIdleTimeMillis: 900000
+                # 配置检测连接是否有效
+                validationQuery: SELECT 1 FROM DUAL
+                testWhileIdle: true
+                testOnBorrow: false
+                testOnReturn: false
+                poolPreparedStatements: true
+                maxPoolPreparedStatementPerConnectionSize: 20
+                filters: stat,slf4j
+            datasource:
+                # 主库数据源
+                master:
+                    driver-class-name: com.mysql.cj.jdbc.Driver
+                    url: jdbc:mysql://127.0.0.1:3306/internal_system?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                    username: ENC(B61B/iRkvmbFXGKCf5kMXTR627s6EtnEDupK8G6IgsyvmCwLLMI3vUUV5DFpu+mY)
+                    password: ENC(1Hbb4fBRWwbjRXVbdkzjmKHhl9/Hp5E1AbMGh9Ke8nsTIXu/2MTB7mApXFhrCk6O)
+                    type: com.alibaba.druid.pool.DruidDataSource
+                # 日报系统
+                nlpm:
+                    driver-class-name: com.mysql.cj.jdbc.Driver
+                    url: jdbc:mysql://mysql.daily.nltd.com.cn:3306/nl_pm_server?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                    username: ENC(31bLBNBrQaW/UIQBBPXbzxW2s5AWgyhwWjzweKcOHINw+z2T1L00inkm8+w83MWV)
+                    password: ENC(J4aHBA1a2YuqJ8+daGCmo+Wnnj3cFoGDptBHeBYXbtTxA8ve85W4r6vJ64Lf1yX8)
+                    type: com.alibaba.druid.pool.DruidDataSource
+                # CRM系统
+                crm_app:
+                    driver-class-name: com.mysql.cj.jdbc.Driver
+                    url: jdbc:mysql://mysql.crm.nltd.com.cn:3306/cfapp_dms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                    username: ENC(B61B/iRkvmbFXGKCf5kMXTR627s6EtnEDupK8G6IgsyvmCwLLMI3vUUV5DFpu+mY)
+                    password: ENC(1Hbb4fBRWwbjRXVbdkzjmKHhl9/Hp5E1AbMGh9Ke8nsTIXu/2MTB7mApXFhrCk6O)
+                    type: com.alibaba.druid.pool.DruidDataSource
+                # CRM系统
+                crm_base:
+                    driver-class-name: com.mysql.cj.jdbc.Driver
+                    url: jdbc:mysql://mysql.crm.nltd.com.cn:3306/cfbase_dms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                    username: ENC(B61B/iRkvmbFXGKCf5kMXTR627s6EtnEDupK8G6IgsyvmCwLLMI3vUUV5DFpu+mY)
+                    password: ENC(1Hbb4fBRWwbjRXVbdkzjmKHhl9/Hp5E1AbMGh9Ke8nsTIXu/2MTB7mApXFhrCk6O)
+                    type: com.alibaba.druid.pool.DruidDataSource
+    # redis 配置
+    data:
+        redis:
+            # 地址
+            host: 127.0.0.1
+            # 端口，默认为6379
+            port: 6379
+            # 数据库索引
+            database: 14
+            # 密码
+            password: 123456..
+            # 连接超时时间
+            timeout: 10s
+            lettuce:
+                pool:
+                    # 连接池中的最小空闲连接
+                    min-idle: 0
+                    # 连接池中的最大空闲连接
+                    max-idle: 8
+                    # 连接池的最大数据库连接数
+                    max-active: 8
+                    # #连接池最大阻塞等待时间（使用负值表示没有限制）
+                    max-wait: -1ms
+# 项目相关配置
+internal:
+    # 名称
+    name: internal
+    # 版本
+    version: 3.8.8
+    # 版权年份
+    copyrightYear: 2024
+    # 文件路径 示例（ Windows配置D:/internal/uploadPath，Linux配置 /home/internal/uploadPath）
+    profile: C:/internal/uploadPath
+    # 获取ip地址开关
+    addressEnabled: false
+    # 验证码类型 math 数字计算 char 字符验证
+    captchaType: math
+
+system:
+    crmProjectSyncUrl: ''
+    syncProjectManagerEmail: ''
+    syncProjectManagerName: ''
